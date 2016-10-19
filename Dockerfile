@@ -1,10 +1,10 @@
-FROM node:6.7.0
+FROM node:6
 
 RUN apt-get update
 RUN apt-get install -y unzip
 
-RUN wget http://releases.hashicorp.com/terraform/0.7.4/terraform_0.7.4_linux_amd64.zip
-RUN unzip terraform_0.7.4_linux_amd64.zip
+RUN wget http://releases.hashicorp.com/terraform/0.7.6/terraform_0.7.6_linux_amd64.zip
+RUN unzip terraform_0.7.6_linux_amd64.zip
 RUN mv terraform /usr/bin/
 
 RUN wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
