@@ -5,6 +5,6 @@
 
 Docker-powered build/deployment environment for React projects on AWS. This Docker image is intended for use with [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines).
 
-This image is based on node:6 (latest) and has Terraform and the AWS CLI installed.
+This image is based on node:6 (latest) and has Terraform, the AWS CLI and Yarn installed.
 
 See [react-redux-terraform-aws](https://github.com/jch254/react-redux-terraform-aws) for an example of this image in action.
