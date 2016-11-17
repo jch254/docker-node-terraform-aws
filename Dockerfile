@@ -1,13 +1,12 @@
-FROM node:latest
+FROM mhart/alpine-node:latest
 
-RUN apt-get update
-RUN apt-get install -y unzip
+RUN apk add --update bash wget unzip python
 
-RUN wget http://releases.hashicorp.com/terraform/0.7.11/terraform_0.7.11_linux_amd64.zip
+RUN wget https://releases.hashicorp.com/terraform/0.7.11/terraform_0.7.11_linux_amd64.zip --no-check-certificate
 RUN unzip terraform_0.7.11_linux_amd64.zip
 RUN mv terraform /usr/bin/
 
-RUN wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
+RUN wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip --no-check-certificate
 RUN unzip awscli-bundle.zip
 RUN ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 RUN aws configure set preview.cloudfront true
