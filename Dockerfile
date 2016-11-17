@@ -1,12 +1,12 @@
 FROM mhart/alpine-node:latest
 
-RUN apk add --update bash wget unzip python
+RUN apk add --update bash wget unzip python ca-certificates
 
-RUN wget https://releases.hashicorp.com/terraform/0.7.11/terraform_0.7.11_linux_amd64.zip --no-check-certificate
+RUN wget https://releases.hashicorp.com/terraform/0.7.11/terraform_0.7.11_linux_amd64.zip
 RUN unzip terraform_0.7.11_linux_amd64.zip
 RUN mv terraform /usr/bin/
 
-RUN wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip --no-check-certificate
+RUN wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
 RUN unzip awscli-bundle.zip
 RUN ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 RUN aws configure set preview.cloudfront true
