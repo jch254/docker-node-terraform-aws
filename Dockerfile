@@ -11,6 +11,6 @@ RUN unzip awscli-bundle.zip
 RUN ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 RUN aws configure set preview.cloudfront true
 
-RUN npm install -g yarn@0.18.1
+RUN npm install -g yarn@0.19.1
 
 ENTRYPOINT ["/bin/bash", "-c"]
