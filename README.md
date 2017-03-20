@@ -6,4 +6,4 @@ Docker-powered build/deployment environment for React projects on AWS. This Dock
 
 This image is based on alpine-node:latest (latest) and has Terraform 0.9.1, the AWS CLI and Yarn 0.21.3 installed.
 
-See [react-redux-terraform-aws](https://github.com/jch254/react-redux-terraform-aws) for an example of this image in action.
+See [serverless-node-dynamodb-ui](https://github.com/jch254/serverless-node-dynamodb-ui) for an example of this image in action.
