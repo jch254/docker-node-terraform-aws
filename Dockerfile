@@ -2,8 +2,8 @@ FROM mhart/alpine-node:latest
 
 RUN apk add --update bash wget unzip python ca-certificates
 
-RUN wget https://releases.hashicorp.com/terraform/0.8.8/terraform_0.8.8_linux_amd64.zip
-RUN unzip terraform_0.8.8_linux_amd64.zip
+RUN wget https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
+RUN unzip terraform_0.9.1_linux_amd64.zip
 RUN mv terraform /usr/bin/
 
 RUN wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
