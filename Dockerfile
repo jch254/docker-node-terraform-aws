@@ -1,16 +1,14 @@
-FROM mhart/alpine-node:latest
+FROM node:7-alpine
 
-RUN apk add --update bash wget unzip python ca-certificates
+RUN apk add --no-cache python py-pip py-setuptools ca-certificates openssl groff less bash && \
+    pip install --no-cache-dir --upgrade pip awscli
 
-RUN wget https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
-RUN unzip terraform_0.9.1_linux_amd64.zip
-RUN mv terraform /usr/bin/
-
-RUN wget https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
-RUN unzip awscli-bundle.zip
-RUN ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 RUN aws configure set preview.cloudfront true
 
-RUN npm install -g yarn@0.21.3
+ENV TERRAFORM_VERSION 0.9.1
+
+RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /usr/local/bin && \
+    rm -f terraform.zip
 
 ENTRYPOINT ["/bin/bash", "-c"]
