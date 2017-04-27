@@ -4,6 +4,6 @@
 
 Docker-powered build/deployment environment for React projects on AWS. This Docker image is intended for use with [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines).
 
-This image is based on node:7-alpine and has Terraform 0.9.3, the AWS CLI and Yarn installed.
+This image is based on node:7-alpine and has Terraform 0.9.4, the AWS CLI and Yarn installed.
 
 See [serverless-node-dynamodb-ui](https://github.com/jch254/serverless-node-dynamodb-ui) for an example of this image in action.
