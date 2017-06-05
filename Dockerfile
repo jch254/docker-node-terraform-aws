@@ -1,6 +1,6 @@
-FROM node:7-alpine
+FROM node:8-alpine
 
-RUN apk add --no-cache python py-pip py-setuptools ca-certificates openssl groff less bash && \
+RUN apk add --no-cache python py-pip py-setuptools ca-certificates openssl groff less bash curl jq && \
     pip install --no-cache-dir --upgrade pip awscli
 
 RUN aws configure set preview.cloudfront true
