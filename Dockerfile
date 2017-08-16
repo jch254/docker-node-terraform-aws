@@ -11,6 +11,7 @@ RUN apk add --no-cache \
     curl \
     jq \
     git \
+    zip \
   && pip install --no-cache-dir --upgrade pip awscli \
   && aws configure set preview.cloudfront true
 
