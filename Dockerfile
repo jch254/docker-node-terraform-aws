@@ -1,4 +1,4 @@
-FROM node:9-alpine
+FROM node:10-alpine
 
 RUN apk add --no-cache \
     python \
@@ -11,11 +11,11 @@ RUN apk add --no-cache \
     curl \
     jq \
     git \
-    zip \
-  && pip install --no-cache-dir --upgrade pip awscli \
-  && aws configure set preview.cloudfront true
+    zip && \
+    pip install --no-cache-dir --upgrade pip awscli && \
+    aws configure set preview.cloudfront true
 
-ENV TERRAFORM_VERSION 0.11.7
+ENV TERRAFORM_VERSION 0.11.8
 
 RUN wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     unzip terraform.zip -d /usr/local/bin && \
