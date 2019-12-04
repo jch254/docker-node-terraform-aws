@@ -1,4 +1,4 @@
-FROM node:11-alpine
+FROM node:13-alpine
 
 RUN apk add --no-cache \
   python \
