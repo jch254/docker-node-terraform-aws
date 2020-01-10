@@ -4,6 +4,6 @@
 
 Docker-powered build/deployment environment for Node.js projects on AWS. This Docker image is intended for use with [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) and [AWS CodeBuild](https://aws.amazon.com/codebuild).
 
-This image is based on node:12-alpine and has Terraform 0.12.18, the AWS CLI and Yarn installed (see Dockerfile for all other installed utilities).
+This image is based on node:12-alpine and has Terraform 0.12.19, the AWS CLI and Yarn installed (see Dockerfile for all other installed utilities).
 
 See [serverless-node-dynamodb-ui](https://github.com/jch254/serverless-node-dynamodb-ui) for an example of this image in action.
