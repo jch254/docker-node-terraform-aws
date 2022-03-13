@@ -1,7 +1,7 @@
 FROM node:10-alpine
 
 RUN apk add --no-cache \
-  python \
+  python3 \
   py-pip \
   py-setuptools \
   ca-certificates \
