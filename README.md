@@ -7,7 +7,3 @@ Docker-powered build/deployment environment for Node.js projects on AWS. This Do
 This image is based on node:14-alpine and has Terraform 0.13.7, the AWS CLI and Yarn installed (see Dockerfile for all other installed utilities).
 
 See [serverless-node-dynamodb-ui](https://github.com/jch254/serverless-node-dynamodb-ui) for an example of this image in action.
-
-## TODO
-
-- Update to latest Terraform
