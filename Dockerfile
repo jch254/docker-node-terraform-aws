@@ -12,11 +12,11 @@ RUN apk add --no-cache \
   curl \
   jq \
   git \
-  zip && \
-  pip install --no-cache-dir --upgrade pip awscli && \
+  zip \
+  aws-cli && \
   aws configure set preview.cloudfront true
 
-ENV TERRAFORM_VERSION 1.5.3
+ENV TERRAFORM_VERSION 1.7.5
 
 RUN wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
   unzip terraform.zip -d /usr/local/bin && \
