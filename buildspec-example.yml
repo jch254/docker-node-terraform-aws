@@ -1,0 +1,89 @@
+version: 0.2
+
+# Example CodeBuild buildspec.yml for the optimized Docker image
+# This configuration is designed to work with the memory-optimized container
+
+env:
+  variables:
+    # Set memory-conscious environment variables
+    NODE_OPTIONS: "--max-old-space-size=1024"
+    # Terraform configuration
+    TF_IN_AUTOMATION: "true"
+    TF_LOG: "WARN"
+    # AWS CLI configuration
+    AWS_DEFAULT_OUTPUT: "json"
+    AWS_PAGER: ""
+
+phases:
+  install:
+    # Use the custom image - no runtime-versions needed with custom image
+    commands:
+      - echo "Build started on $(date)"
+      - echo "Using custom Docker image with Node.js, Terraform, and AWS CLI"
+      # Verify tools are available
+      - node --version
+      - npm --version
+      - terraform version
+      - aws --version
+
+  pre_build:
+    commands:
+      - echo "Pre-build phase started on $(date)"
+      # Install Node.js dependencies if package.json exists
+      - |
+        if [ -f package.json ]; then
+          echo "Installing Node.js dependencies..."
+          npm ci --only=production --no-audit --no-fund
+        fi
+      # Initialize Terraform if infrastructure directory exists
+      - |
+        if [ -d infrastructure ]; then
+          echo "Initializing Terraform..."
+          cd infrastructure
+          terraform init -no-color -input=false
+          cd ..
+        fi
+
+  build:
+    commands:
+      - echo "Build phase started on $(date)"
+      # Build Node.js application if needed
+      - |
+        if [ -f package.json ]; then
+          echo "Building Node.js application..."
+          npm run build --if-present
+        fi
+      # Run Terraform plan/apply if infrastructure exists
+      - |
+        if [ -d infrastructure ]; then
+          echo "Running Terraform plan..."
+          cd infrastructure
+          terraform plan -no-color -input=false -out=tfplan
+          
+          # Apply only if this is a deployment build (e.g., main branch)
+          if [ "$CODEBUILD_WEBHOOK_HEAD_REF" = "refs/heads/main" ]; then
+            echo "Applying Terraform changes..."
+            terraform apply -no-color -input=false -auto-approve tfplan
+          else
+            echo "Skipping Terraform apply for non-main branch"
+          fi
+          cd ..
+        fi
+
+  post_build:
+    commands:
+      - echo "Post-build phase started on $(date)"
+      - echo "Build completed on $(date)"
+
+# Artifacts configuration (if needed)
+artifacts:
+  files:
+    - '**/*'
+  name: build-output-$(date +%Y-%m-%d-%H-%M-%S)
+
+# Cache configuration for better performance
+cache:
+  paths:
+    - '/root/.npm/**/*'
+    - '/root/.terraform.d/plugin-cache/**/*'
+    - 'node_modules/**/*'
