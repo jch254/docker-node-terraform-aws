@@ -12,7 +12,9 @@ Container image providing a consistent build & deployment toolchain for Node.js 
 | Terraform | 1.13.1 (override via build arg) | `ARG TERRAFORM_VERSION` supported |
 | AWS CLI v2 | Latest available in Alpine repo | CloudFront preview enabled |
 | Python 3 + pip | From Alpine | For auxiliary scripts / AWS CLI deps |
-| Yarn | Alpine package | Node package manager alternative |
+| npm | Built-in with Node | Default Node.js package manager |
+| Yarn | Alpine package | Alternative Node package manager |
+| pnpm | Latest via npm | Fast, disk space efficient package manager |
 | jq / curl / git / zip / unzip / bash / wget / less / groff / openssl | System utilities | Common scripting + packaging needs |
 
 Healthcheck validates `node`, `terraform`, and `aws` availability.

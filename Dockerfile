@@ -17,6 +17,8 @@ RUN apk add --no-cache \
   wget \
   aws-cli \
   yarn && \
+  # Install pnpm globally
+  npm install -g pnpm && \
   # Clean up package cache
   rm -rf /var/cache/apk/* && \
   # Configure AWS CLI
