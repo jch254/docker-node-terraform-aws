@@ -4,55 +4,60 @@
 
 Container image providing a consistent build & deployment toolchain for Node.js projects targeting AWS infrastructure with Terraform. Designed for CI systems like [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) and [AWS CodeBuild](https://aws.amazon.com/codebuild).
 
-## Included Tooling (see `Dockerfile` for full list)
+Focused goals:
 
-| Tool | Version (default) | Notes |
-|------|-------------------|-------|
-| Node.js | 24 (alpine base) | Other major versions via branches/tags (below) |
-| Terraform | 1.13.1 (override via build arg) | `ARG TERRAFORM_VERSION` supported |
-| AWS CLI v2 | Latest available in Alpine repo | CloudFront preview enabled |
-| Python 3 + pip | From Alpine | For auxiliary scripts / AWS CLI deps |
-| npm | Built-in with Node | Default Node.js package manager |
-| Yarn | Alpine package | Alternative Node package manager |
-| pnpm | Latest via npm | Fast, disk space efficient package manager |
-| jq / curl / git / zip / unzip / bash / wget / less / groff / openssl | System utilities | Common scripting + packaging needs |
+* Stable, reproducible CI environment (Node + Terraform + AWS CLI v2)
+* Lean Alpine base (fast pulls) while retaining essential utilities
+* Straightforward override of Terraform version & deterministic tagging
+* Proven to work in CodeBuild (avoid SINGLE_BUILD_CONTAINER_DEAD via correct architecture)
 
-Healthcheck validates `node`, `terraform`, and `aws` availability.
+## Included Tooling (see `Dockerfile` for authoritative list)
 
-## Supported Node Base Versions / Branch Mapping
+| Tool | Version / Source | Notes |
+|------|------------------|-------|
+| Node.js | 22 (node:22-alpine) | Use tag `22.x` (pin by digest for immutability) |
+| Terraform | 1.13.1 (default) | Override with `--build-arg TERRAFORM_VERSION=...` |
+| AWS CLI v2 | Alpine repo | Installed via `apk add aws-cli` |
+| Python 3 + pip | Alpine repo | For helper scripts / AWS tooling |
+| npm | Bundled with Node | Core JS package manager |
+| pnpm | Latest (global install) | Fast dependency installs |
+| jq / curl / git / zip / unzip / bash / wget | Utilities | Common scripting + archive tasks |
 
-Each maintained major Node line has a matching branch + Docker tag. Current upstream LTS / alias mapping (as of 2025-08) for reference:
+Not included by default: Yarn (available via Corepack: `corepack enable yarn`), extra pagers (less, groff), OpenSSL headers, build toolchains (add as needed).
 
-| Branch | Node Major | LTS Codename (if applicable) | Upstream alias examples | Example Pull |
-|--------|-----------|------------------------------|-------------------------|--------------|
-| `12.x` | 12 | Erbium (EOL) | lts/erbium | `docker pull jch254/docker-node-terraform-aws:12.x` |
-| `14.x` | 14 | Fermium (EOL) | lts/fermium | `docker pull jch254/docker-node-terraform-aws:14.x` |
-| `16.x` | 16 | Gallium (EOL) | lts/gallium | `docker pull jch254/docker-node-terraform-aws:16.x` |
-| `18.x` | 18 | Hydrogen (Maintenance) | lts/hydrogen | `docker pull jch254/docker-node-terraform-aws:18.x` |
-| `20.x` | 20 | Iron (Active LTS) | lts/iron | `docker pull jch254/docker-node-terraform-aws:20.x` |
-| `22.x` | 22 | Jod (Current LTS) | lts/jod | `docker pull jch254/docker-node-terraform-aws:22.x` |
-| `24.x` | 24 | (Current Latest / Stable) - **Current** | stable, node | `docker pull jch254/docker-node-terraform-aws:24.x` |
+No Docker `HEALTHCHECK` is defined to keep startup overhead minimal. CI systems typically exit on command failure; a healthcheck is seldom necessary. Add one if you run long‑lived build agents.
 
-Notes:
+## Tags & Versioning
 
-* `stable` / `node` upstream presently resolve to v24.7.0.
-* Historical LTS codenames listed for clarity; some are End Of Life (EOL) and provided only for reproducibility.
-* Prefer a pinned major tag (e.g. `22.x`, `24.x`) or digest for deterministic CI builds.
+Primary maintained tag in this repo: `22.x` (Node 22). The `latest` tag currently points to the same major (verify with `docker pull jch254/docker-node-terraform-aws:latest` then inspect digest). Older / newer majors may exist in other branches or historical tags; pin by digest for reproducibility:
 
-`latest` generally tracks the highest actively maintained major (currently Node 24). Pin a major tag (e.g. `24.x`) for stability in CI.
+```bash
+docker pull jch254/docker-node-terraform-aws:22.x@sha256:<digest>
+```
+
+Why digest pinning?
+
+* Guarantees identical toolchain across parallel / future CI runs
+* Enables staged rollouts (update tag, keep old digest in rollback config)
+
+To discover the digest after pulling:
+
+```bash
+docker inspect --format='{{index .RepoDigests 0}}' jch254/docker-node-terraform-aws:22.x
+```
 
 ## Quick Start
 
 Pull and run an interactive shell:
 
 ```bash
-docker run -it --rm jch254/docker-node-terraform-aws:24.x bash
+docker run -it --rm jch254/docker-node-terraform-aws:22.x bash
 ```
 
 Check installed versions:
 
 ```bash
-docker run --rm jch254/docker-node-terraform-aws:24.x "node --version && terraform version && aws --version"
+docker run --rm jch254/docker-node-terraform-aws:22.x "node --version && terraform version && aws --version"
 ```
 
 ## Overriding Terraform Version (local build)
@@ -61,12 +66,18 @@ docker run --rm jch254/docker-node-terraform-aws:24.x "node --version && terrafo
 docker build --build-arg TERRAFORM_VERSION=1.13.1 -t my/ci-image:tf-1.13.1 .
 ```
 
-You can substitute any published Terraform version; architecture (amd64 / arm64) is auto-detected.
+You can substitute any published Terraform version; architecture (amd64 / arm64) is auto-detected during build.
+
+For CodeBuild (currently x86_64 / amd64), ensure you build / push an amd64 image (or multi-arch) and explicitly pull it locally if you're on Apple Silicon:
+
+```bash
+docker build --platform linux/amd64 -t jch254/docker-node-terraform-aws:22.x .
+```
 
 ## Bitbucket Pipelines Example
 
 ```yaml
-image: jch254/docker-node-terraform-aws:24.x
+image: jch254/docker-node-terraform-aws:22.x
 
 pipelines:
 	default:
@@ -94,7 +105,12 @@ phases:
 			- terraform -chdir=infrastructure apply -auto-approve
 ```
 
-Configure the project to use the public image `jch254/docker-node-terraform-aws:24.x` (or another tag) as a custom image.
+Configure the project to use the public image `jch254/docker-node-terraform-aws:22.x` (or a digest‑pinned variant) as a custom image.
+
+Additional samples:
+
+* `buildspec-example.yml` – fuller workflow with conditional apply & caching
+* `buildspec-minimal.yml` – lean template useful for diagnosing environment problems
 
 ## Caching Tips
 
@@ -112,9 +128,9 @@ plugin_cache_dir = "/root/.terraform.d/plugin-cache"
 
 * Node/Yarn dependencies: in CI, leverage built-in caching (Bitbucket `caches: node`) or mount a volume locally.
 
-## Healthcheck
+## Architecture Notes
 
-The image includes a Docker `HEALTHCHECK` executing lightweight version commands. In high-frequency short-lived CI containers you can safely ignore it; for long-running ephemeral build runners it provides a basic sanity signal.
+AWS CodeBuild standard environments presently require `linux/amd64`. If you build this image on an ARM (e.g. Apple M-series) and push without a multi‑arch manifest, CodeBuild may pull an incompatible layer or fail early with opaque errors (e.g. `SINGLE_BUILD_CONTAINER_DEAD`). Always build with `--platform linux/amd64` (or use `docker buildx build --platform linux/amd64,linux/arm64 ...` for multi‑arch) before pushing.
 
 ## Updating / Maintenance
 
@@ -122,21 +138,137 @@ The image includes a Docker `HEALTHCHECK` executing lightweight version commands
 * Terraform: bump default by updating `ARG TERRAFORM_VERSION` in `Dockerfile` (and rebuild / retag).
 * Tag discipline: prefer immutable CI references (e.g. digest pin) if supply chain repeatability is critical.
 
-## Example Project
+## IAM & Terraform Troubleshooting
 
-See [serverless-node-dynamodb-ui](https://github.com/jch254/serverless-node-dynamodb-ui) demonstrating usage in a Serverless + Terraform workflow.
+Common Terraform plan/apply AWS errors in CI & resolutions:
+
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| `AccessDenied: ec2:DescribeVpcAttribute` | Missing EC2 read perms on build role | Add `ec2:Describe*` minimal set needed by your data sources |
+| `UnauthorizedOperation: logs:ListTagsForResource` | CloudWatch Logs tag listing blocked | Grant `logs:ListTagsForResource` (or broader read if acceptable) |
+| `AccessDenied: ecr:DescribeRepositories` | Build role lacks ECR read | Add `ecr:DescribeRepositories` or scoped resource ARNs |
+
+Least‑privilege tip: run `terraform plan` with `TF_LOG=DEBUG` (temporarily) to enumerate denied actions, aggregate, then tighten to wildcard groups (e.g. `ec2:Describe*`) where appropriate.
+
+Environment vars helpful in CI:
+
+```bash
+export TF_IN_AUTOMATION=true
+export AWS_PAGER=""
+export NODE_OPTIONS="--max-old-space-size=512"  # adjust for instance size
+```
+
+## Building Docker Images Inside CodeBuild
+
+If you see:
+
+```text
+ERROR: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+```
+
+The build container cannot reach a Docker daemon. Fix options:
+
+### 1. (Recommended) Enable Privileged Mode
+
+In the CodeBuild project settings enable "Privileged" (or in IaC `privilegedMode: true`). This mounts the host Docker daemon socket inside your build so `docker build` works.
+
+Minimum IAM permissions added to the CodeBuild role when pushing to ECR (adjust resource ARNs):
+
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{ "Effect": "Allow", "Action": ["ecr:GetAuthorizationToken"], "Resource": "*" },
+		{ "Effect": "Allow", "Action": [
+				"ecr:BatchCheckLayerAvailability",
+				"ecr:CompleteLayerUpload",
+				"ecr:DescribeRepositories",
+				"ecr:BatchGetImage",
+				"ecr:InitiateLayerUpload",
+				"ecr:PutImage",
+				"ecr:UploadLayerPart"
+			], "Resource": "arn:aws:ecr:<region>:<account>:repository/<repo-name>" }
+	]
+}
+```
+
+Typical buildspec excerpt:
+
+```yaml
+phases:
+	pre_build:
+		commands:
+			- aws --version
+			- aws ecr get-login-password | docker login --username AWS --password-stdin "$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+	build:
+		commands:
+			- docker build --platform linux/amd64 -t "$IMAGE_REPO_NAME:$IMAGE_TAG" .
+			- docker tag "$IMAGE_REPO_NAME:$IMAGE_TAG" "$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+	post_build:
+		commands:
+			- docker push "$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+```
+
+Add a quick guard early (helps fail fast if privileged not enabled):
+
+```bash
+test -S /var/run/docker.sock || { echo "Docker socket missing (privileged mode off)"; exit 1; }
+```
+
+### 2. Use Kaniko (No Privileged Mode)
+
+If you cannot enable privileged mode, swap Docker daemon usage for [Kaniko]. Example (add to this image at runtime):
+
+```bash
+curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/latest/download/executor-linux-amd64 -o /usr/local/bin/kaniko && chmod +x /usr/local/bin/kaniko
+kaniko --destination "$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG" --context . --build-arg TERRAFORM_VERSION=1.13.1
+```
+
+Supply `/kaniko/.docker/config.json` with ECR auth (or export `AWS_*` env vars—Kaniko supports the SDK creds).
+
+### 3. Use AWS CodeBuild Managed Builds / CodePipeline
+
+If you only need to run Terraform (and not build container images) remove `docker build` lines entirely—this image already includes your toolchain.
+
+### 4. Install Docker CLI (if missing)
+
+This image does not ship with the Docker CLI. If you enabled privileged mode but receive `docker: not found`, layer it:
+
+```bash
+apk add --no-cache docker-cli
+```
+
+Keep this in a separate layer (or derive a child image) rather than bloating the base if most consumers do not need image builds.
+
+### Quick Decision Matrix
+
+| Need | Best Option |
+|------|-------------|
+| Build & push images (have permission) | Privileged mode + Docker CLI |
+| Build images without privileged mode | Kaniko (or BuildKit rootless) |
+| Only Terraform + Node builds | Drop Docker steps |
+| Multi-arch build inside CI | Buildx (privileged) or external pipeline |
+
+If multi‑arch is required, add Buildx:
+
+```bash
+docker buildx create --use --name ci-builder
+docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE" --push .
+```
+
+Ensure QEMU emulators are registered (standard CodeBuild privileged hosts usually have them, else install `qemu-user-static`).
 
 ## Contributing
 
 1. Fork & branch (`feat/...` or `chore/...`).
-2. Make changes; keep layers minimal.
-3. Build & smoke test:
+2. Make changes; keep layers minimal (group `apk add` lines, remove caches).
+3. Build & smoke test (force amd64 if on ARM host):
 
 ```bash
 docker build -t test-image . && docker run --rm test-image "terraform version"
 ```
 
-1. Open PR describing rationale (tool additions, version bumps, optimizations).
+1. Open PR describing rationale (tool additions, version bumps, optimizations, size/security impact).
 
 ## Issues / Support
 
@@ -148,10 +280,13 @@ Please open a GitHub issue with:
 
 ## Security
 
-No root password, minimal additional packages. For stricter environments you may:
+Baseline hardening considerations (opt-in):
 
-* Add vulnerability scanning (e.g. `docker scout cves` or Trivy) in CI.
-* Pin package versions explicitly (currently using rolling Alpine repo versions for utilities).
+* Run as non-root (add user + `USER` directive) if build steps permit.
+* Add vulnerability scanning (e.g. Trivy, Grype, or `docker scout cves`) in CI.
+* Pin Alpine repository snapshot (e.g. use a specific minor tag) for utility determinism.
+* Consider digest pinning of Terraform zip (verify SHA256) for supply chain integrity.
+* Trim unused package managers (remove pnpm if not needed) to reduce surface.
 
 ## License
 

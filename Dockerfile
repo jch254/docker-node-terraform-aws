@@ -1,48 +1,34 @@
-FROM node:24-alpine
+FROM node:22-alpine
 
-# Install system packages and clean up in single layer
+# CodeBuild-compatible setup with essential tools
+ENV NODE_OPTIONS="--max-old-space-size=512"
+
+# Install essential packages including tools for package management
 RUN apk add --no-cache \
-  python3 \
-  py3-pip \
-  ca-certificates \
-  openssl \
-  groff \
-  less \
   bash \
   curl \
-  jq \
-  git \
-  zip \
-  unzip \
   wget \
+  unzip \
+  zip \
   aws-cli \
-  yarn && \
-  # Install pnpm globally
-  npm install -g pnpm && \
-  # Clean up package cache
-  rm -rf /var/cache/apk/* && \
-  # Configure AWS CLI
-  aws configure set preview.cloudfront true
+  git \
+  jq \
+  python3 \
+  py3-pip && \
+  rm -rf /var/cache/apk/*
 
-# Define versions as build arguments for flexibility
+# Install pnpm
+RUN npm install -g --no-audit --no-fund pnpm && \
+  npm cache clean --force
+
+# Install Terraform
 ARG TERRAFORM_VERSION=1.13.1
+RUN ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') && \
+  wget -q -O /tmp/terraform.zip \
+  "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip" && \
+  unzip -q /tmp/terraform.zip -d /usr/local/bin && \
+  rm /tmp/terraform.zip
 
-# Install Terraform with architecture detection
-RUN TERRAFORM_ARCH="$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')" && \
-  wget -O terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${TERRAFORM_ARCH}.zip" && \
-  unzip terraform.zip -d /usr/local/bin && \
-  rm -f terraform.zip && \
-  # Verify installation
-  terraform version
+WORKDIR /workspace
 
-# Add labels for better maintainability
-LABEL maintainer="jch254" \
-  description="Docker image for Node.js/Terraform/AWS development" \
-  node.version="24" \
-  terraform.version="${TERRAFORM_VERSION}"
-
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node --version && terraform version && aws --version || exit 1
-
-ENTRYPOINT ["/bin/bash", "-c"]
+# No custom entrypoint - CodeBuild compatible
