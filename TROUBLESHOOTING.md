@@ -135,14 +135,14 @@ phases:
 ### Build commands for current setup:
 
 ```bash
-# Enhanced barebone (RECOMMENDED - proven to work in CodeBuild)
-docker build --platform linux/amd64 -f Dockerfile.enhanced-barebone -t docker-node-terraform-aws:22.x .
+# Main Dockerfile (RECOMMENDED - now contains enhanced barebone with all tools)
+docker build --platform linux/amd64 -t docker-node-terraform-aws:22.x .
 
 # Original barebone (works but missing pnpm/git)
 docker build --platform linux/amd64 -f Dockerfile.barebone -t docker-node-terraform-aws:barebone .
 
-# Full optimized image (might still have issues)
-docker build --platform linux/amd64 -f Dockerfile -t docker-node-terraform-aws:full .
+# Ultra-minimal (testing only)
+docker build --platform linux/amd64 -f Dockerfile.ultra-minimal -t docker-node-terraform-aws:ultra .
 ```
 
 ### Push to ECR for testing:

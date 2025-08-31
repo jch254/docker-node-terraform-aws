@@ -1,58 +1,34 @@
 FROM node:22-alpine
 
-# CodeBuild environment variables for memory optimization
-ENV NODE_OPTIONS="--max-old-space-size=1024" \
-  NPM_CONFIG_FUND=false \
-  NPM_CONFIG_AUDIT=false \
-  NPM_CONFIG_PROGRESS=false \
-  NPM_CONFIG_LOGLEVEL=warn \
-  PYTHONUNBUFFERED=1
+# CodeBuild-compatible setup with essential tools
+ENV NODE_OPTIONS="--max-old-space-size=512"
 
-# Install system packages
-RUN apk update && apk add --no-cache \
-  python3 \
-  py3-pip \
-  ca-certificates \
-  openssl \
+# Install essential packages including tools for package management
+RUN apk add --no-cache \
   bash \
   curl \
-  jq \
-  git \
-  zip \
-  unzip \
   wget \
-  aws-cli && \
-  rm -rf /var/cache/apk/* /tmp/*
+  unzip \
+  zip \
+  aws-cli \
+  git \
+  jq \
+  python3 \
+  py3-pip && \
+  rm -rf /var/cache/apk/*
 
-# Install Node.js tools
+# Install pnpm
 RUN npm install -g --no-audit --no-fund pnpm && \
-  npm cache clean --force && \
-  rm -rf /root/.npm
+  npm cache clean --force
 
 # Install Terraform
 ARG TERRAFORM_VERSION=1.13.1
 RUN ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') && \
-  wget -q -O terraform.zip \
+  wget -q -O /tmp/terraform.zip \
   "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip" && \
-  unzip -q terraform.zip -d /usr/local/bin && \
-  rm terraform.zip && \
-  chmod +x /usr/local/bin/terraform
+  unzip -q /tmp/terraform.zip -d /usr/local/bin && \
+  rm /tmp/terraform.zip
 
-# Configure AWS CLI
-RUN aws configure set preview.cloudfront true
-
-# Create workspace
 WORKDIR /workspace
 
-# Labels
-LABEL maintainer="jch254" \
-  description="CodeBuild-optimized Docker image for Node.js/Terraform/AWS" \
-  node.version="22" \
-  terraform.version="${TERRAFORM_VERSION}"
-
-# Simple entrypoint for CodeBuild compatibility
-COPY entrypoint-simple.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# Use bash directly as entrypoint - CodeBuild expects this
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# No custom entrypoint - CodeBuild compatible
