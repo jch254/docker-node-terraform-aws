@@ -1,11 +1,23 @@
 FROM node:22-alpine
 
-# Absolute minimal setup for CodeBuild compatibility
+# CodeBuild-compatible setup with essential tools
 ENV NODE_OPTIONS="--max-old-space-size=512"
 
-# Install only essential packages
-RUN apk add --no-cache bash curl wget unzip aws-cli && \
+# Install essential packages including tools for package management
+RUN apk add --no-cache \
+    bash \
+    curl \
+    wget \
+    unzip \
+    aws-cli \
+    git \
+    python3 \
+    py3-pip && \
     rm -rf /var/cache/apk/*
+
+# Install pnpm
+RUN npm install -g --no-audit --no-fund pnpm && \
+    npm cache clean --force
 
 # Install Terraform
 ARG TERRAFORM_VERSION=1.13.1
@@ -17,5 +29,4 @@ RUN ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') && \
 
 WORKDIR /workspace
 
-# NO custom entrypoint - let CodeBuild handle process management
-# This is the most CodeBuild-compatible approach
+# No custom entrypoint - CodeBuild compatible

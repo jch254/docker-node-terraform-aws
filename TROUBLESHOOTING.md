@@ -69,6 +69,15 @@ docker inspect docker-node-terraform-aws:22.x | grep Architecture
    ```bash  
    docker build --platform linux/amd64 -f Dockerfile.barebone -t test:barebone .
    ```
+   **✅ SUCCESS CONFIRMED**: Barebone image starts correctly in CodeBuild!
+   **⚠️ NOTE**: Barebone image only has Node.js, bash, curl, wget, unzip, aws-cli, terraform
+   **Missing**: pnpm, python3, git, jq, zip - add these if your buildspec needs them
+
+   **🎯 SOLUTION**: Use enhanced barebone image with pnpm:
+   ```bash
+   docker build --platform linux/amd64 -f Dockerfile.enhanced-barebone -t enhanced:22.x .
+   # This includes: Node.js + pnpm + Terraform + AWS CLI + git + python3
+   ```
 
 3. **Full image** (616MB - if barebone works):
    ```bash
@@ -126,11 +135,14 @@ phases:
 ### Build commands for current setup:
 
 ```bash
-# Main optimized image (recommended first try)
-docker build --platform linux/amd64 -t docker-node-terraform-aws:22.x .
+# Enhanced barebone (RECOMMENDED - proven to work in CodeBuild)
+docker build --platform linux/amd64 -f Dockerfile.enhanced-barebone -t docker-node-terraform-aws:22.x .
 
-# Barebone fallback (if main image fails)
+# Original barebone (works but missing pnpm/git)
 docker build --platform linux/amd64 -f Dockerfile.barebone -t docker-node-terraform-aws:barebone .
+
+# Full optimized image (might still have issues)
+docker build --platform linux/amd64 -f Dockerfile -t docker-node-terraform-aws:full .
 ```
 
 ### Push to ECR for testing:

@@ -1,8 +1,0 @@
-FROM node:22-alpine
-
-# Ultra-minimal - just Node.js and bash for testing
-RUN apk add --no-cache bash && rm -rf /var/cache/apk/*
-
-WORKDIR /workspace
-
-# No entrypoint, no environment variables, minimal packages
