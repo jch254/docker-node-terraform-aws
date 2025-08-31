@@ -1,6 +1,6 @@
 # docker-node-terraform-aws
 
-[![Docker Hub](https://img.shields.io/docker/pulls/jch254/docker-node-terraform-aws)](https://hub.docker.com/r/jch254/docker-node-terraform-aws) [![Docker Image Size](https://img.shields.io/docker/image-size/jch254/docker-node-terraform-aws/latest)](https://hub.docker.com/r/jch254/docker-node-terraform-aws) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docker Hub](https://img.shields.io/docker/pulls/jch254/docker-node-terraform-aws)](https://hub.docker.com/r/jch254/docker-node-terraform-aws) [![Docker Image Size](https://img.shields.io/docker/image-size/jch254/docker-node-terraform-aws/22.x)](https://hub.docker.com/r/jch254/docker-node-terraform-aws) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 Container image providing a consistent build & deployment toolchain for Node.js projects targeting AWS infrastructure with Terraform. Designed for CI systems like [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) and [AWS CodeBuild](https://aws.amazon.com/codebuild).
 
