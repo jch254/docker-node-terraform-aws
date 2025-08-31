@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:24-alpine
 
 RUN apk add --no-cache \
   python3 \
@@ -16,7 +16,7 @@ RUN apk add --no-cache \
   aws-cli && \
   aws configure set preview.cloudfront true
 
-ENV TERRAFORM_VERSION 1.7.5
+ENV TERRAFORM_VERSION=1.13.1
 
 RUN wget -O terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
   unzip terraform.zip -d /usr/local/bin && \
