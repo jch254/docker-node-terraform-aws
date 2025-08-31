@@ -1,0 +1,45 @@
+version: 0.2
+
+# Minimal buildspec.yml to avoid SINGLE_BUILD_CONTAINER_DEAD error
+# Use this with docker-node-terraform-aws:22.x-minimal
+
+env:
+  variables:
+    # Essential environment variables only
+    NODE_OPTIONS: "--max-old-space-size=512"
+    TF_IN_AUTOMATION: "true"
+    AWS_PAGER: ""
+
+phases:
+  install:
+    commands:
+      - echo "Build started on $(date)"
+      # Quick tool verification
+      - node --version
+      - terraform version
+      - aws --version
+
+  pre_build:
+    commands:
+      - echo "Pre-build phase"
+      # Only install dependencies if needed
+      - |
+        if [ -f package.json ]; then
+          npm ci --only=production --no-audit --no-fund
+        fi
+
+  build:
+    commands:
+      - echo "Build phase"
+      - echo "Add your build commands here"
+      # Example: terraform commands
+      # - cd infrastructure && terraform init && terraform plan
+
+  post_build:
+    commands:
+      - echo "Build completed on $(date)"
+
+# Keep artifacts simple
+artifacts:
+  files:
+    - '**/*'

@@ -1,0 +1,21 @@
+FROM node:22-alpine
+
+# Absolute minimal setup for CodeBuild compatibility
+ENV NODE_OPTIONS="--max-old-space-size=512"
+
+# Install only essential packages
+RUN apk add --no-cache bash curl wget unzip aws-cli && \
+    rm -rf /var/cache/apk/*
+
+# Install Terraform
+ARG TERRAFORM_VERSION=1.13.1
+RUN ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') && \
+    wget -q -O /tmp/terraform.zip \
+    "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip" && \
+    unzip -q /tmp/terraform.zip -d /usr/local/bin && \
+    rm /tmp/terraform.zip
+
+WORKDIR /workspace
+
+# NO custom entrypoint - let CodeBuild handle process management
+# This is the most CodeBuild-compatible approach
