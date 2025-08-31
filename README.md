@@ -30,7 +30,7 @@ Each maintained major Node line has a matching branch + Docker tag. Current upst
 | `16.x` | 16 | Gallium (EOL) | lts/gallium | `docker pull jch254/docker-node-terraform-aws:16.x` |
 | `18.x` | 18 | Hydrogen (Maintenance) | lts/hydrogen | `docker pull jch254/docker-node-terraform-aws:18.x` |
 | `20.x` | 20 | Iron (Active LTS) | lts/iron | `docker pull jch254/docker-node-terraform-aws:20.x` |
-| `22.x` | 22 | Jod (Current LTS) | lts/jod | `docker pull jch254/docker-node-terraform-aws:22.x` |
+| `22.x` | 22 | Jod (Current LTS) - **Current** | lts/jod | `docker pull jch254/docker-node-terraform-aws:22.x` |
 | `24.x` | 24 | (Current Latest / Stable) | stable, node | `docker pull jch254/docker-node-terraform-aws:24.x` |
 
 Notes:
