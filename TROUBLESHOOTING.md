@@ -28,7 +28,9 @@ pre_build:
 ### Cause 2: Image Architecture Mismatch  
 - **Symptoms**: Container fails to start immediately
 - **Solution**: Ensure image is built for linux/amd64
-- **Verify**: `docker inspect your-image | grep Architecture`
+- **Verify**: `docker inspect your-image | grep Architecture` should show `"Architecture": "amd64"`
+- **Fix**: `docker build --platform linux/amd64 -t your-image:tag .`
+- **⚠️ CRITICAL**: Even if you fixed this once, check again - Docker might rebuild for your local platform
 
 ### Cause 3: Entrypoint Issues
 - **Symptoms**: Container starts then dies quickly
@@ -46,6 +48,53 @@ pre_build:
 - **Test**: Use buildspec-minimal.yml
 
 ## Step-by-Step Debugging:
+
+### 🚨 **EMERGENCY: Still Getting SINGLE_BUILD_CONTAINER_DEAD?**
+
+**First, verify your image architecture:**
+```bash
+docker inspect docker-node-terraform-aws:22.x | grep Architecture
+# MUST show: "Architecture": "amd64"
+# If it shows "arm64", run: docker tag docker-node-terraform-aws:22.x-amd64 docker-node-terraform-aws:22.x
+```
+
+**Try these images in order:**
+
+1. **Ultra-minimal test** (162MB - most likely to work):
+   ```bash
+   docker build --platform linux/amd64 -f Dockerfile.ultra-minimal -t test:ultra .
+   ```
+
+2. **Barebone image** (445MB - if ultra-minimal works):
+   ```bash  
+   docker build --platform linux/amd64 -f Dockerfile.barebone -t test:barebone .
+   ```
+
+3. **Full image** (616MB - if barebone works):
+   ```bash
+   docker build --platform linux/amd64 -t test:full .
+   ```
+
+**Ultra-minimal buildspec for testing:**
+   ```yaml
+   version: 0.2
+   phases:
+     install:
+       commands:
+         - echo "Container alive"
+         - node --version
+     build:
+       commands:
+         - echo "Build phase works"
+   ```
+
+4. **Check CodeBuild Settings**:
+   - Compute: BUILD_GENERAL1_MEDIUM (7GB) minimum
+   - Environment: Linux container
+   - Image: Your ECR URI or Docker Hub image
+   - Privileged: OFF (unless Docker-in-Docker needed)
+
+### Original Debugging Steps:
 
 1. **Test 1**: Use main optimized image with minimal buildspec
    - If this works → Issue is with your buildspec complexity
