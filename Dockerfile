@@ -14,6 +14,7 @@ RUN apk add --no-cache \
   git \
   jq \
   python3 \
+  apk add docker-cli \
   py3-pip && \
   rm -rf /var/cache/apk/*
 
