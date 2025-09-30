@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM public.ecr.aws/docker/library/node:22-alpine
 
 # CodeBuild-compatible setup with essential tools
 ENV NODE_OPTIONS="--max-old-space-size=512"
