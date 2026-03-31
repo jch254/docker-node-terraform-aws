@@ -19,7 +19,7 @@ Focused goals:
 | Terraform | 1.14.8 (default) | Override with `--build-arg TERRAFORM_VERSION=...` |
 | AWS CLI v2 | Alpine repo | Installed via `apk add aws-cli` |
 | Python 3 + pip | Alpine repo | For helper scripts / AWS tooling |
-| Docker + CLI + Buildx | Alpine repo | Docker-in-Docker / sidecar builds; `DOCKER_DRIVER=fuse-overlayfs` |
+| Docker + CLI + Buildx | Alpine repo | Docker-in-Docker / sidecar builds |
 | fuse-overlayfs | Alpine repo | Rootless-friendly overlay driver for Docker storage |
 | npm | Bundled with Node | Core JS package manager |
 | pnpm | Latest (global install) | Fast dependency installs |

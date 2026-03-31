@@ -1,7 +1,6 @@
 FROM public.ecr.aws/docker/library/node:22-alpine
 
 ENV NODE_OPTIONS="--max-old-space-size=512"
-ENV DOCKER_DRIVER=fuse-overlayfs
 
 # Install essential packages + Docker runtime + overlay support
 RUN apk add --no-cache \
