@@ -1,9 +1,9 @@
 FROM public.ecr.aws/docker/library/node:22-alpine
 
-# CodeBuild-compatible setup with essential tools
 ENV NODE_OPTIONS="--max-old-space-size=512"
+ENV DOCKER_DRIVER=fuse-overlayfs
 
-# Install essential packages including tools for package management
+# Install essential packages + Docker runtime + overlay support
 RUN apk add --no-cache \
   bash \
   curl \
@@ -14,8 +14,11 @@ RUN apk add --no-cache \
   git \
   jq \
   python3 \
-  apk add docker-cli \
-  py3-pip && \
+  py3-pip \
+  docker \
+  docker-cli \
+  docker-cli-buildx \
+  fuse-overlayfs && \
   rm -rf /var/cache/apk/*
 
 # Install pnpm
@@ -31,5 +34,3 @@ RUN ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') && \
   rm /tmp/terraform.zip
 
 WORKDIR /workspace
-
-# No custom entrypoint - CodeBuild compatible
