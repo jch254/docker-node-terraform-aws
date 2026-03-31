@@ -25,7 +25,7 @@ RUN apk add --no-cache \
   aws configure set preview.cloudfront true
 
 # Define versions as build arguments for flexibility
-ARG TERRAFORM_VERSION=1.13.1
+ARG TERRAFORM_VERSION=1.14.8
 
 # Install Terraform with architecture detection
 RUN TERRAFORM_ARCH="$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')" && \

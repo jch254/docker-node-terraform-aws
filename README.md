@@ -9,7 +9,7 @@ Container image providing a consistent build & deployment toolchain for Node.js 
 | Tool | Version (default) | Notes |
 |------|-------------------|-------|
 | Node.js | 18 (alpine base) | Other major versions via branches/tags (below) |
-| Terraform | 1.13.1 (override via build arg) | `ARG TERRAFORM_VERSION` supported |
+| Terraform | 1.14.8 (override via build arg) | `ARG TERRAFORM_VERSION` supported |
 | AWS CLI v2 | Latest available in Alpine repo | CloudFront preview enabled |
 | Python 3 + pip | From Alpine | For auxiliary scripts / AWS CLI deps |
 | npm | Built-in with Node | Default Node.js package manager |
