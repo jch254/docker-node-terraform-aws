@@ -23,7 +23,7 @@ RUN npm install -g --no-audit --no-fund pnpm && \
   npm cache clean --force
 
 # Install Terraform
-ARG TERRAFORM_VERSION=1.13.1
+ARG TERRAFORM_VERSION=1.14.8
 RUN ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') && \
   wget -q -O /tmp/terraform.zip \
   "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip" && \

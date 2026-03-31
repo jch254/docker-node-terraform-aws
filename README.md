@@ -16,7 +16,7 @@ Focused goals:
 | Tool | Version / Source | Notes |
 |------|------------------|-------|
 | Node.js | 22 (node:22-alpine) | Use tag `22.x` (pin by digest for immutability) |
-| Terraform | 1.13.1 (default) | Override with `--build-arg TERRAFORM_VERSION=...` |
+| Terraform | 1.14.8 (default) | Override with `--build-arg TERRAFORM_VERSION=...` |
 | AWS CLI v2 | Alpine repo | Installed via `apk add aws-cli` |
 | Python 3 + pip | Alpine repo | For helper scripts / AWS tooling |
 | npm | Bundled with Node | Core JS package manager |
